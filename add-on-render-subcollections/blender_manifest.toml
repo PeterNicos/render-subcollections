@@ -1,0 +1,26 @@
+schema_version = "1.0.0"
+
+id = "render_subcollections"
+version = "1.0.0"
+name = "Render Subcollections"
+tagline = "Lets you select subcollections in your scenetree, then for each subcollection: Activates it, renders the camera(s) inside, deactivates it"
+maintainer = "Nico Peters"
+type = "add-on"
+
+# # Optional: link to documentation, support, source files, etc
+website = "https://github.com/PeterNicos/render-subcollections"
+
+# # Optional: tag list defined by Blender and server, see:
+# # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
+tags = ["Pipeline", "Render", "Camera", "3D View"]
+
+blender_version_min = "4.2.0"
+# # Optional: Blender version that the extension does not support, earlier versions are supported.
+# # This can be omitted and defined later on the extensions platform if an issue is found.
+# blender_version_max = "5.1.0"
+
+# License conforming to https://spdx.org/licenses/ (use "SPDX: prefix)
+# https://docs.blender.org/manual/en/dev/advanced/extensions/licenses.html
+license = [
+  "SPDX:GPL-3.0-or-later",
+]

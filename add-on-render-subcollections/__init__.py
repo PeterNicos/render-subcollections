@@ -1,10 +1,10 @@
 bl_info = {
     "name": "Render Subcollections",
-    "author": "Mark und Nico",
-    "version": (1, 0),
-    "blender": (3, 0, 0),
+    "author": "Nico",
+    "version": (1, 0, 0),
+    "blender": (4, 2, 0),
     "location": "3D View > N-Panel > Render Subcollections",
-    "description": "Choose a Collection, then leave the Add-On to activate individual Collections within and render cameras inside these collections one after another.",
+    "description": "Choose a Collection, then leave the Add-On to activate individual collections within and render cameras inside these collections one after another.",
     "category": "Render"
 }
 
@@ -12,7 +12,7 @@ import bpy
 import os
 
 # -------------------------------------------------------------
-# Hilfsfunktionen
+# Helpers
 # -------------------------------------------------------------
 
 def get_subcollections(collection, result=None):
@@ -35,82 +35,82 @@ def find_layer_collection(layer_collection, target_collection):
 
 
 # -------------------------------------------------------------
-# Operatoren
+# Operators
 # -------------------------------------------------------------
 
 class RENDER_OT_selected_subcollections(bpy.types.Operator):
-    """Render Kameras in ausgewählten Untercollections"""
+    """Render cameras in selected subcollections"""
     bl_idname = "render.selected_subcollections"
     bl_label = "Render Selected Subcollections"
 
     def execute(self, context):
         scene = context.scene
 
-        # Originalen Outputpfad sichern
+        # Store original output path
         original_path = scene.render.filepath
 
-        # Output-Ordner aus Blender-Settings
+        # Output folder from Blender-Settings
         output_folder = bpy.path.abspath(original_path)
 
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        # Haupt-Collection aus Dropdown
+        # Main Collection containing all desired subcollections from dropdown
         main_collection = scene.main_collection
         if not main_collection:
-            self.report({'WARNING'}, "Keine Haupt-Collection ausgewählt!")
+            self.report({'WARNING'}, "No main collection selected!")
             return {'CANCELLED'}
 
-        # Finde alle Untercollections, die im Panel ausgewählt sind
+        # Find all collections, selected in the panel
         subcollections = get_subcollections(main_collection)
         selected_collections = [col for col in subcollections if col.render_selected]
 
         if not selected_collections:
-            self.report({'WARNING'}, "Keine Untercollections ausgewählt!")
+            self.report({'WARNING'}, "No subcollections selected!")
             return {'CANCELLED'}
 
         for collection in selected_collections:
             layer_col = find_layer_collection(bpy.context.view_layer.layer_collection, collection)
             if not layer_col:
-                self.report({'WARNING'}, f"LayerCollection für {collection.name} nicht gefunden!")
+                self.report({'WARNING'}, f"LayerCollection for {collection.name} not found!")
                 continue
 
-            # Temporär aktivieren
+            # Activate temporarily
             original_state = layer_col.exclude
             layer_col.exclude = False
 
-            # Kameras in dieser Collection
+            # Cameras inside this specific collection
             cameras = [obj for obj in collection.objects if obj.type == 'CAMERA']
             if not cameras:
-                self.report({'INFO'}, f"Keine Kamera in {collection.name}")
+                self.report({'INFO'}, f"No camera in {collection.name}")
                 layer_col.exclude = original_state
                 continue
 
             for cam in cameras:
                 scene.camera = cam
 
-                # Dateiname = Prefix + Kameraname + Suffix
+                # Filename = Prefix + Cameraname + Suffix
                 prefix = scene.filename_prefix or ""
                 suffix = scene.filename_suffix or ""
                 filename = f"{prefix}{cam.name}{suffix}.png"
                 
                 filepath = os.path.join(output_folder, filename)
 
-                # Temporär setzen
+                # Set temporarily
                 scene.render.filepath = filepath
 
-                # Rendern
+                # Render
                 bpy.ops.render.render(write_still=True)
 
-                self.report({'INFO'}, f"Gerendert: {filepath}")
+                self.report({'INFO'}, f"Rendered: {filepath}")
 
-            # Collection wieder ausschalten
+            # Deactivate again
             layer_col.exclude = original_state
 
-        # Outputpfad wiederherstellen
+        # Restore Outputpath
         scene.render.filepath = original_path
 
-        self.report({'INFO'}, "Alle Renderings abgeschlossen!")
+        self.report({'INFO'}, "All renderings completed!")
         return {'FINISHED'}
 
     
@@ -124,42 +124,42 @@ class RENDER_OT_active_camera(bpy.types.Operator):
         cam = scene.camera
 
         if cam is None:
-            self.report({'WARNING'}, "Keine aktive Kamera gesetzt!")
+            self.report({'WARNING'}, "No active camera set!")
             return {'CANCELLED'}
 
-        # Originalen Outputpfad sichern
+        # Store original output path
         original_path = scene.render.filepath
 
-        # Output-Ordner aus Blender-Settings
+        # Output folder from Blender-Settings
         output_folder = bpy.path.abspath(original_path)
 
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        # Dateiname = Prefix + Kameraname + Suffix
+        # Filename = Prefix + Cameraname + Suffix
         prefix = scene.filename_prefix or ""
         suffix = scene.filename_suffix or ""
         filename = f"{prefix}{cam.name}{suffix}.png"
 
         filepath = os.path.join(output_folder, filename)
 
-        # Temporär setzen
+        # Set temporarily
         scene.render.filepath = filepath
 
-        # Rendern
+        # Render
         bpy.ops.render.render(write_still=True)
 
-        # Outputpfad wiederherstellen
+        # Restore Outputpath
         scene.render.filepath = original_path
 
-        self.report({'INFO'}, f"Gerendert: {filepath}")
+        self.report({'INFO'}, f"Rendered: {filepath}")
         return {'FINISHED'}
 
 
 
 
 # -------------------------------------------------------------
-# Panel (N‑Panel)
+# Panel (N-Panel)
 # -------------------------------------------------------------
 
 class RENDER_PT_subcollections(bpy.types.Panel):
@@ -173,11 +173,11 @@ class RENDER_PT_subcollections(bpy.types.Panel):
         layout = self.layout
         scene = context.scene
 
-        layout.prop(scene, "main_collection", text="Haupt-Collection")
+        layout.prop(scene, "main_collection", text="Main Collection")
 
         main_collection = scene.main_collection
         if main_collection:
-            layout.label(text="Untercollections:")
+            layout.label(text="Subcollections:")
             for col in get_subcollections(main_collection):
                 row = layout.row()
                 row.prop(col, "render_selected", text=col.name)
@@ -194,12 +194,12 @@ class RENDER_PT_subcollections(bpy.types.Panel):
 
         layout.operator("render.selected_subcollections", text="Render Selected Subcollections")
         
-        # Button um aktive Kamera mit Name der Kamera zu rendern
+        # Button to render active camera with name of the camera as filename
         layout.separator()  # kleiner Trenner
         layout.operator("render.active_camera", text="Render currently active Camera")
 
 
-                # --- Output Settings ---
+        # --- Output Settings ---
         layout.separator()
         layout.label(text="Output Settings", icon="OUTPUT")
 
@@ -232,22 +232,22 @@ class RENDER_PT_subcollections(bpy.types.Panel):
         box = layout.box()
         box.prop(image_settings, "file_format", text="Format")
 
-        # Nur anzeigen, wenn Format Farbauswahl unterstützt
+        # Only show, when format supports color selection
         if image_settings.file_format not in {"OPEN_EXR", "HDR"}:
             box.prop(image_settings, "color_mode", text="Color Mode")
 
-        # Farbtiefe (falls verfügbar)
+        # Color depth (if supported)
         if image_settings.file_format in {"PNG", "OPEN_EXR", "JPEG2000"}:
             box.prop(image_settings, "color_depth", text="Color Depth")
 
-        # Kompression (falls verfügbar)
+        # Compression (if supported)
         if image_settings.file_format in {"PNG", "JPEG", "JPEG2000"}:
             box.prop(image_settings, "compression", text="Compression")
 
 
 
 # -------------------------------------------------------------
-# Registrierung
+# Register
 # -------------------------------------------------------------
 
 classes = (
@@ -262,24 +262,24 @@ def register():
 
     bpy.types.Scene.main_collection = bpy.props.PointerProperty(
         name="Main Collection",
-        description="Wähle die Haupt-Collection",
+        description="Choose your Main Collection",
         type=bpy.types.Collection
     )
 
     bpy.types.Collection.render_selected = bpy.props.BoolProperty(
         name="Render",
-        description="Diese Collection rendern?",
+        description="Render this collection?",
         default=False
     )
 
     bpy.types.Scene.filename_prefix = bpy.props.StringProperty(
         name="Prefix",
-        description="Text vor dem Kameranamen"
+        description="Text that will be added in front of each cameraname"
     )
 
     bpy.types.Scene.filename_suffix = bpy.props.StringProperty(
         name="Suffix",
-        description="Text nach dem Kameranamen"
+        description="Text that will be added after each cameraname"
     )
 
 
