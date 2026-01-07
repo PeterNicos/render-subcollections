@@ -3,7 +3,7 @@ schema_version = "1.0.0"
 id = "render_subcollections"
 version = "1.0.0"
 name = "Render Subcollections"
-tagline = "Lets you select subcollections in your scenetree, then for each subcollection: Activates it, renders the camera(s) inside, deactivates it"
+tagline = "Automatically renders subcollections one by one"
 maintainer = "Nico Peters"
 type = "add-on"
 
