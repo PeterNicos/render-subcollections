@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "render_subcollections"
-version = "1.0.0"
+version = "1.0.1"
 name = "Render Subcollections"
 tagline = "Automatically renders subcollections one by one"
 maintainer = "Nico Peters"
@@ -12,7 +12,7 @@ website = "https://github.com/PeterNicos/render-subcollections"
 
 # # Optional: tag list defined by Blender and server, see:
 # # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
-tags = ["Pipeline", "Render", "Camera", "3D View"]
+tags = ["Render", "Camera"]
 
 blender_version_min = "4.2.0"
 # # Optional: Blender version that the extension does not support, earlier versions are supported.
